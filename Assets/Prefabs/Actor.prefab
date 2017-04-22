@@ -37,7 +37,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4841490368831792}
-  - component: {fileID: 114297879070257084}
+  - component: {fileID: 114553812590045630}
   m_Layer: 0
   m_Name: Actor
   m_TagString: Untagged
@@ -85,7 +85,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 69cf5f8d13f7b914db0744a576c2f8ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -111,7 +111,7 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1463923853523470}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &114297879070257084
+--- !u!114 &114553812590045630
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -119,9 +119,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1499482122663526}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02d5e4ebd8271e743bccea2241e92858, type: 3}
+  m_Script: {fileID: 11500000, guid: f7c4fd79d2548d44a8a361e330181525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  viewPrefab: {fileID: 114400570335606880, guid: 121515045a278c14ca4ed50e9130eb1c,
+    type: 2}
 --- !u!136 &136711156760059512
 CapsuleCollider:
   m_ObjectHideFlags: 1

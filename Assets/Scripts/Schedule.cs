@@ -41,8 +41,10 @@ public class Schedule
 
     public void ComputePath()
     {
+        m_path.Clear();
         List<Waypoint> crossedList = new List<Waypoint>();
         Waypoint currentWaypoint = firstWaypoint;
+        m_path.Add(firstWaypoint.position);
         while (currentWaypoint != null && crossedList.Find(x => (x == currentWaypoint)) == null)
         {
             currentWaypoint.pathIndex = m_path.Count;
@@ -52,11 +54,9 @@ public class Schedule
                 Pathfinding.Node endNode = m_lvl.GetPathfindNodeAt(currentWaypoint.next.position);
                 List<Pathfinding.Node> path;
                 Pathfinding.AStar(startNode, endNode, out path);
-                for (int i = 0; i < path.Count; ++i)
+                for (int i = 1; i < path.Count; ++i)
                 {
-                    if (i > 0)
-                        path[i].RemoveEdge(path[i - 1]);
-
+                    path[i].RemoveEdge(path[i - 1]);
                     m_path.Add(new Vector2(path[i].position.x, path[i].position.z));
                 }
             }
@@ -64,6 +64,12 @@ public class Schedule
             crossedList.Add(currentWaypoint);
             currentWaypoint = currentWaypoint.next;
         }
+
+        // HACKS: too tired to fix the algorithm right now,
+        firstWaypoint.pathIndex = 0;
+        if (currentWaypoint != null)
+            m_path.RemoveAt(m_path.Count - 1);
+
         m_doNotRecompute = true;
         m_lvl.ResetPathfindGraph();
         m_doNotRecompute = false;

@@ -30,11 +30,9 @@ public class GridActor : MonoBehaviour
 
     protected virtual void Start()
     {
-        /*
         Transform dummy = transform.FindChild("_dummy");
         if (dummy != null)
             Destroy(dummy.gameObject);
-        */
     }
 
     protected virtual void Update ()

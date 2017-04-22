@@ -50,7 +50,9 @@ public class InputManager : MonoBehaviour
             return new Vector2(Mathf.Floor(point.x), Mathf.Floor(point.z));
         }
         else
-            Debug.LogError("Failed to get pos under mouse");
+        {
+            //Debug.LogError("Failed to get pos under mouse");
+        }
 
         return Vector2.zero;
     }

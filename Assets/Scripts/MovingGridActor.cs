@@ -4,11 +4,16 @@ using UnityEngine;
 
 public class MovingGridActor : GridActor
 {
+    public delegate void TickAction();
+    public event TickAction OnTick;
+
+    public MovingActorView viewPrefab;
 
     protected override void Start ()
 	{
         base.Start();
 
+        m_game = FindObjectOfType<Game>();
         m_lvl = FindObjectOfType<Level>();
         m_schedule = new Schedule(m_lvl);
         m_schedule.firstWaypoint.position = GetPosition();
@@ -18,11 +23,16 @@ public class MovingGridActor : GridActor
         Schedule.Waypoint w3 = new Schedule.Waypoint(new Vector2(6, 5));
 
         m_schedule.firstWaypoint.next = w1;
-        w1.next = w2;
-        w2.next = w3;
-        w3.next = m_schedule.firstWaypoint;
+        w1.next = w2; w2.previous = w1;
+        w2.next = w3; w3.previous = w2;
+        w3.next = m_schedule.firstWaypoint; m_schedule.firstWaypoint.previous = w3;
 
         m_schedule.ComputePath();
+
+        m_currentWaypoint = m_schedule.firstWaypoint;
+
+        MovingActorView view = Instantiate(viewPrefab, transform);
+        view.target = this;
     }
 	
 	protected override void Update ()
@@ -47,7 +57,33 @@ public class MovingGridActor : GridActor
             Vector2 pos1 = m_schedule.GetPath()[i];
             Debug.DrawLine(new Vector3(pos0.x, 0.0f, pos0.y) + offset, new Vector3(pos1.x, 0.0f, pos1.y) + offset, Color.yellow);
         }
+
+        m_timer += Time.deltaTime;
+        while(m_timer > m_game.cycleDuration)
+        {
+            m_timer -= m_game.cycleDuration;
+            Tick();
+        }
     }
 
+    void Tick()
+    {
+        ++m_pathIncrement;
+        int currentPathIndex = (m_currentWaypoint.pathIndex + m_pathIncrement) % m_schedule.GetPath().Count;
+        if (currentPathIndex == m_currentWaypoint.next.pathIndex)
+        {
+            m_currentWaypoint = m_currentWaypoint.next;
+            m_pathIncrement = 0;
+        }
+
+        SetPosition(m_schedule.GetPath()[currentPathIndex]);
+
+        if (OnTick != null) OnTick();
+    }
+
+    float m_timer;
+    Schedule.Waypoint m_currentWaypoint;
+    int m_pathIncrement;
     Schedule m_schedule;
+    Game m_game;
 }
