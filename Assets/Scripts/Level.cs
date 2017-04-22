@@ -10,6 +10,9 @@ public class Level : MonoBehaviour
 
     public GameObject groundTilePrefab;
 
+    [Header("Debug")]
+    public bool displayPathfindGraph = false;
+
     public int GetIndex(int _x, int _y)
     {
         if (_x < 0 || _y < 0 || _x >= width || _y >= height)
@@ -21,6 +24,21 @@ public class Level : MonoBehaviour
     public int GetIndex(Vector2 _position)
     {
         return GetIndex(Mathf.FloorToInt(_position.x), Mathf.FloorToInt(_position.y));
+    }
+
+    public Vector2 GetPosition(int _index)
+    {
+        return new Vector2(_index % width, _index / width);
+    }
+
+    public Pathfinding.Node GetPathfindNodeAt(Vector2 _position)
+    {
+        int i = GetIndex(_position);
+
+        if (i < 0)
+            return null;
+
+        return m_pathfindGraph[i];
     }
 
     public bool MoveActor(GridActor _actor, Vector2 _destination)
@@ -44,6 +62,7 @@ public class Level : MonoBehaviour
 	{
         ResetOccupationMap();
         GenerateGround();
+        ResetPathfindGraph();
 	}
 	
 	void Update ()
@@ -52,6 +71,23 @@ public class Level : MonoBehaviour
         {
             GenerateGround();
             ResetOccupationMap();
+            ResetPathfindGraph();
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (displayPathfindGraph)
+        {
+            Vector3 offset = new Vector3(0.5f, 0.1f, 0.5f);
+            foreach (Pathfinding.Node node in m_pathfindGraph)
+            {
+                Gizmos.DrawWireSphere(node.position + offset, 0.25f);
+                foreach (KeyValuePair<Pathfinding.Node, float> pair in node.neighbours)
+                {
+                    Gizmos.DrawLine(node.position + offset, pair.Key.position + offset);
+                }
+            }
         }
     }
 
@@ -74,7 +110,8 @@ public class Level : MonoBehaviour
         m_groundTiles = new GameObject[width * height];
         for (int i = 0; i < width * height; ++i)
         {
-            m_groundTiles[i] = Instantiate(groundTilePrefab, new Vector3(i % width, 0.0f, i / width), Quaternion.identity, transform);
+            Vector2 p = GetPosition(i);
+            m_groundTiles[i] = Instantiate(groundTilePrefab, new Vector3(p.x, 0.0f, p.y), Quaternion.identity, transform);
         }
         m_sizeChanged = false;
     }
@@ -98,7 +135,43 @@ public class Level : MonoBehaviour
         }
     }
 
+    void ResetPathfindGraph()
+    {
+        if (m_pathfindGraph != null)
+        {
+            m_pathfindGraph = null;
+        }
+
+        m_pathfindGraph = new Pathfinding.Node[width * height];
+        for (int i = 0; i < width * height; ++i)
+        {
+            Vector2 p = GetPosition(i);
+            m_pathfindGraph[i] = new Pathfinding.Node();
+            m_pathfindGraph[i].position = new Vector3(p.x, 0.0f, p.y);
+        }
+
+        for (int i = 0; i < width * height; ++i)
+        {
+            Pathfinding.Node node = m_pathfindGraph[i];
+            Vector2 p = GetPosition(i);
+            int[] neighbours = new int[4];
+            neighbours[0] = GetIndex((int)p.x + 1, (int)p.y);
+            neighbours[1] = GetIndex((int)p.x, (int)p.y + 1);
+            neighbours[2] = GetIndex((int)p.x - 1, (int)p.y);
+            neighbours[3] = GetIndex((int)p.x, (int)p.y - 1);
+
+            for (int j = 0; j < 4; ++j)
+            {
+                if (neighbours[j] < 0)
+                    continue;
+
+                node.AddEdge(m_pathfindGraph[neighbours[j]], 1.0f, false);
+            }
+        }
+    }
+
     GridActor[] m_occupationMap;
     GameObject[] m_groundTiles;
+    Pathfinding.Node[] m_pathfindGraph;
     bool m_sizeChanged = false;
 }
