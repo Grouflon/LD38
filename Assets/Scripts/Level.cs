@@ -9,6 +9,8 @@ public class Level : MonoBehaviour
     public int height;
 
     public GameObject groundTilePrefab;
+    public delegate void LevelAction();
+    public event LevelAction pathfindRecomputed;
 
     [Header("Debug")]
     public bool displayPathfindGraph = false;
@@ -58,7 +60,17 @@ public class Level : MonoBehaviour
         return true;
     }
 
-	void Start ()
+    public void PushPathfindGraph()
+    {
+
+    }
+
+    public void PopPathfindGraph()
+    {
+
+    }
+
+	void Awake ()
 	{
         ResetOccupationMap();
         GenerateGround();
@@ -135,7 +147,7 @@ public class Level : MonoBehaviour
         }
     }
 
-    void ResetPathfindGraph()
+    public void ResetPathfindGraph()
     {
         if (m_pathfindGraph != null)
         {
@@ -168,6 +180,8 @@ public class Level : MonoBehaviour
                 node.AddEdge(m_pathfindGraph[neighbours[j]], 1.0f, false);
             }
         }
+
+        if (pathfindRecomputed != null) pathfindRecomputed();
     }
 
     GridActor[] m_occupationMap;

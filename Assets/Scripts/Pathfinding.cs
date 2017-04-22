@@ -15,7 +15,7 @@ public class Pathfinding
         public Node node;
         public float priority;
     }
-    static public bool AStar(Node _start, Node _dest, out List<Node> _result, Heuristic _heuristic)
+    static public bool AStar(Node _start, Node _dest, out List<Node> _result, Heuristic _heuristic = Pathfinding.Heuristic.Manhattan)
     {
         _result = new List<Node>();
         List<OpenNode> openList = new List<OpenNode>();
@@ -108,12 +108,18 @@ public class Pathfinding
 
             if (_reciprocal && _target.neighbours.ContainsKey(this))
             {
-                Debug.LogError("Node Can't link twice with same node");
+                Debug.LogError("Node Can't link with same node twice");
                 return;
             }
 
             neighbours.Add(_target, _cost);
             if (_reciprocal) _target.neighbours.Add(this, _cost);
+        }
+
+        public void RemoveEdge(Node _target, bool _reciprocal = true)
+        {
+            neighbours.Remove(_target);
+            if (_reciprocal) _target.neighbours.Remove(this);
         }
 
         public Vector3 position;

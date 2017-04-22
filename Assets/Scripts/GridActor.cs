@@ -22,13 +22,13 @@ public class GridActor : MonoBehaviour
         return m_position;
     }
 
-	void Awake ()
+	protected virtual void Awake ()
 	{
         m_lvl = FindObjectOfType<Level>();
         m_position = new Vector2(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.z));
 	}
 
-    private void Start()
+    protected virtual void Start()
     {
         /*
         Transform dummy = transform.FindChild("_dummy");
@@ -37,11 +37,11 @@ public class GridActor : MonoBehaviour
         */
     }
 
-    void Update ()
+    protected virtual void Update ()
 	{
         transform.position = new Vector3(m_position.x + 0.5f, 0.0f, m_position.y + 0.5f);
 	}
 
-    Level m_lvl;
+    protected Level m_lvl;
     Vector2 m_position;
 }
