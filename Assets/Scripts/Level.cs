@@ -148,7 +148,7 @@ public class Level : MonoBehaviour
         }
     }
 
-    public void ResetPathfindGraph()
+    public void ResetPathfindGraph(bool emitEvent = false)
     {
         if (m_pathfindGraph != null)
         {
@@ -182,7 +182,7 @@ public class Level : MonoBehaviour
             }
         }
 
-        if (pathfindRecomputed != null) pathfindRecomputed();
+        if (emitEvent && pathfindRecomputed != null) pathfindRecomputed();
     }
 
     GridActor[] m_occupationMap;

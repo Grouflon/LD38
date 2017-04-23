@@ -8,6 +8,7 @@ public class MovingGridActor : GridActor
     public event TickAction OnTick;
 
     public MovingActorView viewPrefab;
+    public Waypoint waypointPrefab;
 
     protected override void Start ()
 	{
@@ -15,21 +16,32 @@ public class MovingGridActor : GridActor
 
         m_game = FindObjectOfType<Game>();
         m_lvl = FindObjectOfType<Level>();
-        m_schedule = GetComponent<Schedule>();
-        m_schedule.firstWaypoint.position = GetPosition();
+        m_rootWaypoint = Instantiate(waypointPrefab);
+        m_rootWaypoint.SetPosition(GetPosition());
+        m_rootWaypoint.index = 0;
 
-        Schedule.Waypoint w1 = new Schedule.Waypoint(new Vector2(2, 2));
-        Schedule.Waypoint w2 = new Schedule.Waypoint(new Vector2(5, 5));
-        Schedule.Waypoint w3 = new Schedule.Waypoint(new Vector2(6, 5));
+        Waypoint w1 = Instantiate(waypointPrefab);
+        w1.SetPosition(new Vector2(2, 2));
+        m_rootWaypoint.SetNext(w1);
+        w1.SetPrevious(m_rootWaypoint);
+        w1.index = 1;
 
-        m_schedule.firstWaypoint.next = w1; w1.previous = m_schedule.firstWaypoint;
-        w1.next = w2; w2.previous = w1;
-        w2.next = w3; w3.previous = w2;
-        w3.next = w1;
+        Waypoint w2 = Instantiate(waypointPrefab);
+        w2.SetPosition(new Vector2(5, 5));
+        w1.SetNext(w2);
+        w2.SetPrevious(w1);
+        w2.index = 2;
+        w2.SetNext(w1);
 
-        m_schedule.ComputePath();
+        Waypoint w3 = Instantiate(waypointPrefab);
+        w3.SetPosition(new Vector2(6, 2));
+        //w2.SetNext(w3);
+        w3.SetPrevious(w2);
+        w3.index = 3;
 
-        m_currentWaypoint = m_schedule.firstWaypoint;
+        w3.SetNext(m_rootWaypoint);
+
+        m_currentWaypoint = m_rootWaypoint;
 
         MovingActorView view = Instantiate(viewPrefab, transform);
         view.target = this;
@@ -38,25 +50,6 @@ public class MovingGridActor : GridActor
 	protected override void Update ()
 	{
         base.Update();
-
-        Vector3 offset = new Vector3(0.0f, 0.15f, 0.0f);
-
-        List < Schedule.Waypoint> crossedList = new List<Schedule.Waypoint>();
-        Schedule.Waypoint currentWaypoint = m_schedule.firstWaypoint;
-        while (currentWaypoint!= null && crossedList.Find(x => (x == currentWaypoint)) == null)
-        {
-            Debug.DrawLine(new Vector3(currentWaypoint.position.x, 0.0f, currentWaypoint.position.y) + offset, new Vector3(currentWaypoint.position.x, 0.0f, currentWaypoint.position.y) + offset + new Vector3(0.0f, 0.5f, 0.0f), Color.yellow);
-
-            crossedList.Add(currentWaypoint);
-            currentWaypoint = currentWaypoint.next;
-        }
-
-        for (int i = 1; i < m_schedule.GetPath().Count; ++i)
-        {
-            Vector2 pos0 = m_schedule.GetPath()[i - 1];
-            Vector2 pos1 = m_schedule.GetPath()[i];
-            Debug.DrawLine(new Vector3(pos0.x, 0.0f, pos0.y) + offset, new Vector3(pos1.x, 0.0f, pos1.y) + offset, Color.yellow);
-        }
 
         m_timer += Time.deltaTime;
         while(m_timer > m_game.cycleDuration)
@@ -68,46 +61,58 @@ public class MovingGridActor : GridActor
 
     void Tick()
     {
-        int currentPathIndex = 0;
-        if (m_direction == 1)
+        if (m_direction == 1 && m_pathIncrement == m_currentWaypoint.GetPathToNext().Count - 1 && m_currentWaypoint.GetNext() == null)
+            m_direction = -1;
+        else if (m_direction == -1 && m_pathIncrement == 0 && m_currentWaypoint.GetPrevious() == null)
+            m_direction = 1;
+
+
+        do
         {
-            ++m_pathIncrement;
-            currentPathIndex = (m_currentWaypoint.pathIndex + m_pathIncrement);
-            if (currentPathIndex == m_currentWaypoint.next.pathIndex || currentPathIndex == m_schedule.GetPath().Count)
+            if (m_direction == 1)
             {
-                m_currentWaypoint = m_currentWaypoint.next;
-                currentPathIndex = m_currentWaypoint.pathIndex;
-                m_pathIncrement = 0;
-
-                if (m_currentWaypoint.next == null)
-                    m_direction = -1;
+                ++m_pathIncrement;
+                if (m_pathIncrement == m_currentWaypoint.GetPathToNext().Count)
+                {
+                    if (m_currentWaypoint.GetNext() != null)
+                    {
+                        m_currentWaypoint = m_currentWaypoint.GetNext();
+                        m_pathIncrement = 0;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
-        }
-        else if (m_direction == -1)
-        {
-            --m_pathIncrement;
-            currentPathIndex = m_currentWaypoint.pathIndex + m_pathIncrement;
-            if (currentPathIndex == m_currentWaypoint.previous.pathIndex || currentPathIndex == -1)
+            else if (m_direction == -1)
             {
-                m_currentWaypoint = m_currentWaypoint.previous;
-                currentPathIndex = m_currentWaypoint.pathIndex;
-                m_pathIncrement = 0;
-
-                if (m_currentWaypoint.previous == null)
-                    m_direction = 1;
+                --m_pathIncrement;
+                if (m_pathIncrement == -1)
+                {
+                    if (m_currentWaypoint.GetPrevious() != null)
+                    {
+                        m_currentWaypoint = m_currentWaypoint.GetPrevious();
+                        m_pathIncrement = m_currentWaypoint.GetPathToNext().Count - 1;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
-        }
-        
 
-        SetPosition(m_schedule.GetPath()[currentPathIndex]);
+            SetPosition(m_currentWaypoint.GetPathToNext()[m_pathIncrement]);
+
+        } while (false);
 
         if (OnTick != null) OnTick();
     }
 
     float m_timer;
-    Schedule.Waypoint m_currentWaypoint;
+    Waypoint m_currentWaypoint;
     int m_pathIncrement;
     int m_direction = 1;
-    Schedule m_schedule;
+    Waypoint m_rootWaypoint;
     Game m_game;
 }

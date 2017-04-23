@@ -50,9 +50,9 @@ public class Pathfinding
                     {
                         case Heuristic.Manhattan:
                             {
-                                priority += _dest.position.x - next.position.x;
-                                priority += _dest.position.y - next.position.y;
-                                priority += _dest.position.z - next.position.z;
+                                priority += Mathf.Abs(_dest.position.x - next.position.x);
+                                priority += Mathf.Abs(_dest.position.y - next.position.y);
+                                priority += Mathf.Abs(_dest.position.z - next.position.z);
                             }
                             break;
                     }

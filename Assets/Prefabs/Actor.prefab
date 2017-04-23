@@ -38,7 +38,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4841490368831792}
   - component: {fileID: 114553812590045630}
-  - component: {fileID: 114096218917391962}
   m_Layer: 0
   m_Name: Actor
   m_TagString: Untagged
@@ -66,7 +65,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1499482122663526}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4715156133804070}
@@ -112,21 +111,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1463923853523470}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &114096218917391962
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1499482122663526}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2eb2d86bed99054eaff1bafa4ba3d0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waypointPrefab: {fileID: 1219731378678168, guid: 66df0a6614030ae4f9328eccb1b66729,
-    type: 2}
-  pathSegmentPrefab: {fileID: 1814855362229608, guid: dd37950bda7323b4692b238127feb00b,
-    type: 2}
 --- !u!114 &114553812590045630
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -139,6 +123,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewPrefab: {fileID: 114400570335606880, guid: 121515045a278c14ca4ed50e9130eb1c,
+    type: 2}
+  waypointPrefab: {fileID: 114600844009275824, guid: 66df0a6614030ae4f9328eccb1b66729,
     type: 2}
 --- !u!136 &136711156760059512
 CapsuleCollider:
