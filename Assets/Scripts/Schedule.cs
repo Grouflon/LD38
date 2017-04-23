@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-public class Schedule
+public class Schedule : MonoBehaviour
 {
     public class Waypoint
     {
@@ -25,11 +25,16 @@ public class Schedule
 
     public Waypoint firstWaypoint;
 
-    public Schedule(Level _level)
+    public GameObject waypointPrefab;
+    public GameObject pathSegmentPrefab;
+
+    void Awake()
     {
         firstWaypoint = new Waypoint();
-        m_lvl = _level;
+        m_lvl = FindObjectOfType<Level>();
         m_path = new List<Vector2>();
+        m_view = new GameObject();
+        m_view.name = "ScheduleView";
 
         m_lvl.pathfindRecomputed += OnPathfindRecomputed;
     }
@@ -41,13 +46,14 @@ public class Schedule
 
     public void ComputePath()
     {
+        int waypointIndex = 0;
         m_path.Clear();
         List<Waypoint> crossedList = new List<Waypoint>();
         Waypoint currentWaypoint = firstWaypoint;
         m_path.Add(firstWaypoint.position);
         while (currentWaypoint != null && crossedList.Find(x => (x == currentWaypoint)) == null)
         {
-            currentWaypoint.pathIndex = m_path.Count;
+            currentWaypoint.pathIndex = m_path.Count - 1;
             if (currentWaypoint.next != null)
             {
                 Pathfinding.Node startNode = m_lvl.GetPathfindNodeAt(currentWaypoint.position);
@@ -61,14 +67,34 @@ public class Schedule
                 }
             }
 
+            // CREATE WAYPOINTS
+            GameObject waypoint = Instantiate(waypointPrefab);
+            waypoint.transform.parent = m_view.transform;
+            TextMesh text = waypoint.GetComponentInChildren<TextMesh>();
+            text.text = waypointIndex.ToString();
+            waypoint.transform.position = new Vector3(currentWaypoint.position.x, 0.0f, currentWaypoint.position.y);
+            ++waypointIndex;
+
             crossedList.Add(currentWaypoint);
             currentWaypoint = currentWaypoint.next;
         }
 
         // HACKS: too tired to fix the algorithm right now,
-        firstWaypoint.pathIndex = 0;
         if (currentWaypoint != null)
             m_path.RemoveAt(m_path.Count - 1);
+
+        // CREATE SEGMENTS
+        for (int i = 0; i < m_path.Count; ++i)
+        {
+            if (i == m_path.Count - 1 && currentWaypoint == null)
+                break;
+
+            GameObject pathSegment = Instantiate(pathSegmentPrefab);
+            pathSegment.transform.parent = m_view.transform;
+            pathSegment.transform.position = new Vector3(m_path[i].x, 0.0f, m_path[i].y);
+            pathSegment.transform.LookAt(i == m_path.Count - 1 ? new Vector3(currentWaypoint.position.x, 0.0f, currentWaypoint.position.y) : new Vector3(m_path[(i + 1) % m_path.Count].x, 0.0f, m_path[(i + 1) % m_path.Count].y));
+        }
+        
 
         m_doNotRecompute = true;
         m_lvl.ResetPathfindGraph();
@@ -84,4 +110,5 @@ public class Schedule
     Level m_lvl;
     List<Vector2> m_path;
     bool m_doNotRecompute = false;
+    GameObject m_view;
 }

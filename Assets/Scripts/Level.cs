@@ -91,7 +91,7 @@ public class Level : MonoBehaviour
     {
         if (displayPathfindGraph)
         {
-            Vector3 offset = new Vector3(0.5f, 0.1f, 0.5f);
+            Vector3 offset = new Vector3(0.0f, 0.1f, 0.0f);
             foreach (Pathfinding.Node node in m_pathfindGraph)
             {
                 Gizmos.DrawWireSphere(node.position + offset, 0.25f);
@@ -124,6 +124,7 @@ public class Level : MonoBehaviour
         {
             Vector2 p = GetPosition(i);
             m_groundTiles[i] = Instantiate(groundTilePrefab, new Vector3(p.x, 0.0f, p.y), Quaternion.identity, transform);
+            m_groundTiles[i].hideFlags = HideFlags.DontSaveInEditor;
         }
         m_sizeChanged = false;
     }

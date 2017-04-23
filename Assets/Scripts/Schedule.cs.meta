@@ -1,10 +1,14 @@
 fileFormatVersion: 2
 guid: c2eb2d86bed99054eaff1bafa4ba3d0e
-timeCreated: 1492880694
+timeCreated: 1492932501
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - waypointPrefab: {fileID: 1219731378678168, guid: 66df0a6614030ae4f9328eccb1b66729,
+      type: 2}
+  - pathSegmentPrefab: {fileID: 1814855362229608, guid: dd37950bda7323b4692b238127feb00b,
+      type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -24,7 +24,7 @@ public class InputManager : MonoBehaviour
             List<Pathfinding.Node> path;
             if (Pathfinding.AStar(startNode, endNode, out path, Pathfinding.Heuristic.Manhattan))
             {
-                Vector3 offset = new Vector3(0.5f, 0.2f, 0.5f);
+                Vector3 offset = new Vector3(0.0f, 0.2f, 0.0f);
                 for (int i = 0; i < path.Count; ++i)
                 {
                     Debug.DrawLine(path[i].position + offset, path[i].position + offset + new Vector3(0.0f, 0.5f, 0.0f), Color.red);
@@ -34,9 +34,24 @@ public class InputManager : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonUp(0))
         {
-            a.SetPosition(mousePosition);
+            Ray ray = m_cam.ScreenPointToRay(new Vector3(mousePosition.x, mousePosition.y, 0.0f));
+            RaycastHit hit;
+            bool deselect = true;
+            if (Physics.Raycast(ray, out hit, 100.0f))
+            {
+                MovingActorView view = hit.collider.GetComponent<MovingActorView>();
+                if (view != null && view.target == m_selectedActor)
+                {
+                    deselect = false;
+                }
+            }
+
+            if (deselect)
+            {
+                m_selectedActor = null;
+            }
         }
 	}
 
@@ -56,6 +71,13 @@ public class InputManager : MonoBehaviour
 
         return Vector2.zero;
     }
+
+    public void OnActorPressed(MovingGridActor _actor)
+    {
+        m_selectedActor = _actor;
+    }
+
+    MovingGridActor m_selectedActor;
 
     Level m_lvl;
     Camera m_cam;

@@ -15,17 +15,17 @@ public class MovingGridActor : GridActor
 
         m_game = FindObjectOfType<Game>();
         m_lvl = FindObjectOfType<Level>();
-        m_schedule = new Schedule(m_lvl);
+        m_schedule = GetComponent<Schedule>();
         m_schedule.firstWaypoint.position = GetPosition();
 
         Schedule.Waypoint w1 = new Schedule.Waypoint(new Vector2(2, 2));
         Schedule.Waypoint w2 = new Schedule.Waypoint(new Vector2(5, 5));
         Schedule.Waypoint w3 = new Schedule.Waypoint(new Vector2(6, 5));
 
-        m_schedule.firstWaypoint.next = w1;
+        m_schedule.firstWaypoint.next = w1; w1.previous = m_schedule.firstWaypoint;
         w1.next = w2; w2.previous = w1;
         w2.next = w3; w3.previous = w2;
-        w3.next = m_schedule.firstWaypoint; m_schedule.firstWaypoint.previous = w3;
+        w3.next = w1;
 
         m_schedule.ComputePath();
 
@@ -39,7 +39,7 @@ public class MovingGridActor : GridActor
 	{
         base.Update();
 
-        Vector3 offset = new Vector3(0.5f, 0.15f, 0.5f);
+        Vector3 offset = new Vector3(0.0f, 0.15f, 0.0f);
 
         List < Schedule.Waypoint> crossedList = new List<Schedule.Waypoint>();
         Schedule.Waypoint currentWaypoint = m_schedule.firstWaypoint;
@@ -68,13 +68,36 @@ public class MovingGridActor : GridActor
 
     void Tick()
     {
-        ++m_pathIncrement;
-        int currentPathIndex = (m_currentWaypoint.pathIndex + m_pathIncrement) % m_schedule.GetPath().Count;
-        if (currentPathIndex == m_currentWaypoint.next.pathIndex)
+        int currentPathIndex = 0;
+        if (m_direction == 1)
         {
-            m_currentWaypoint = m_currentWaypoint.next;
-            m_pathIncrement = 0;
+            ++m_pathIncrement;
+            currentPathIndex = (m_currentWaypoint.pathIndex + m_pathIncrement);
+            if (currentPathIndex == m_currentWaypoint.next.pathIndex || currentPathIndex == m_schedule.GetPath().Count)
+            {
+                m_currentWaypoint = m_currentWaypoint.next;
+                currentPathIndex = m_currentWaypoint.pathIndex;
+                m_pathIncrement = 0;
+
+                if (m_currentWaypoint.next == null)
+                    m_direction = -1;
+            }
         }
+        else if (m_direction == -1)
+        {
+            --m_pathIncrement;
+            currentPathIndex = m_currentWaypoint.pathIndex + m_pathIncrement;
+            if (currentPathIndex == m_currentWaypoint.previous.pathIndex || currentPathIndex == -1)
+            {
+                m_currentWaypoint = m_currentWaypoint.previous;
+                currentPathIndex = m_currentWaypoint.pathIndex;
+                m_pathIncrement = 0;
+
+                if (m_currentWaypoint.previous == null)
+                    m_direction = 1;
+            }
+        }
+        
 
         SetPosition(m_schedule.GetPath()[currentPathIndex]);
 
@@ -84,6 +107,7 @@ public class MovingGridActor : GridActor
     float m_timer;
     Schedule.Waypoint m_currentWaypoint;
     int m_pathIncrement;
+    int m_direction = 1;
     Schedule m_schedule;
     Game m_game;
 }

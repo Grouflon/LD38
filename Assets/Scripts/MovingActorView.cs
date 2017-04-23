@@ -9,6 +9,7 @@ public class MovingActorView : MonoBehaviour
 	void Start ()
 	{
         m_game = FindObjectOfType<Game>();
+        m_input = FindObjectOfType<InputManager>();
         target.OnTick += OnTick;
 	}
 	
@@ -21,7 +22,7 @@ public class MovingActorView : MonoBehaviour
         }
 
         transform.position = Vector3.Lerp(new Vector3(m_previousPosition.x, 0.0f, m_previousPosition.y), new Vector3(m_currentPosition.x, 0.0f, m_currentPosition.y), m_timer / m_game.cycleDuration);
-        transform.position = transform.position + new Vector3(0.5f, 0.0f, 0.5f);
+        transform.position = transform.position;
 	}
 
     void OnTick()
@@ -30,8 +31,14 @@ public class MovingActorView : MonoBehaviour
         m_currentPosition = target.GetPosition();
     }
 
+    private void OnMouseUpAsButton()
+    {
+        m_input.OnActorPressed(target);
+    }
+
     float m_timer;
     Game m_game;
+    InputManager m_input;
     Vector2 m_previousPosition;
     Vector2 m_currentPosition;
 }
